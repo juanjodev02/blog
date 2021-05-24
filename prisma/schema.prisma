@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Auth {
+  id        Int       @id @default(autoincrement())
+  password  String    @db.VarChar(255)
+  email     String    @db.VarChar(255) @unique
+  ProfileId Int
+  profiles  User      @relation(fields: [ProfileId], references: [id])
+}
+
+model Author {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  lastName  String    @db.VarChar(255)
+  twitter   String?   @db.VarChar(255)
+  github    String?   @db.VarChar(255)
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  posts     Post[]
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  title     String    @db.VarChar(300)
+  date      DateTime? @db.Date()
+  coverImage  String  @db.VarChar(300)
+  excerpt   String    @db.Text()
+  ogImage   String    @db.Text()
+  slug      String    @db.VarChar(300)
+  published Boolean   @default(false)
+  views     Int       @default(0)
+  likes     Int       @default(0)
+  authorId  Int
+  author    Author    @relation(fields: [authorId], references: [id])
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @db.VarChar(255) @unique
+  author    Author?
+  auth      Auth[]
+}
