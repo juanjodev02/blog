@@ -1,6 +1,6 @@
 Club de software EPN
 
-## Deploy your own
+## Hola mundo
 
 Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example):
 
