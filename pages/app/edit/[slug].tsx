@@ -1,7 +1,7 @@
 import { User, Author, Post } from '@prisma/client'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import io from 'socket.io-client'
-import { Box, HStack } from '@chakra-ui/react'
+import { Box, Spinner } from '@chakra-ui/react'
 import Signin from '../../signin'
 import { useRouter } from 'next/router'
 import MdeEditor from '../../../components/MdeEditor'
@@ -43,63 +43,42 @@ const EditSlug = ({ user, loggedIn, auhtor, post, slug }: Props) => {
     return <Signin loggedIn={loggedIn}/>
   }
 
-  const { data, loading, refetch } = useQuery(GET_POST_CHANGES, { variables: { slug }, fetchPolicy: 'no-cache' })
-
-  // const [getChanges, { data, loading }] = useLazyQuery(GET_POST_CHANGES, { fetchPolicy: 'no-cache', variables: { slug } })
-
   const [values, setValue] = useState('')
 
   const [content, setContent] = useState('')
 
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
-    console.log('agregando listeners')
-    fetch('/api/socketio').finally(() => {
+    fetch('/api/socketio').then(() => {
       socket.on('connect', () => {
         console.log('connect')
       })
 
       socket.on('getPostChange', (data) => {
-        setContent(data.postPayload.payload)
+        setContent(data.postPayload)
+        setLoading(false)
       })
 
       socket.on('disconnect', () => {
         console.log('disconnect')
       })
-    })
+    }).finally(() => setLoading(false))
   }, [])
 
-  // const [content, setContent] = useState('')
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetch('/api/socketio').finally(() => {
+        socket.emit('postChange', { payload: values, slug })
+      })
+    }, 1000)
+    return () => window.clearTimeout(delayDebounceFn)
+  }, [values])
 
-  const [sendChanges] = useMutation(SEND_CHANGES, { fetchPolicy: 'no-cache' })
-
-  // useEffect(() => {
-  //   const fetch = async () => {
-  //     await sendChanges({
-  //       variables: {
-  //         slug,
-  //         payload: value
-  //       }
-  //     })
-  //     await refetch()
-  //   }
-  //   fetch()
-  // }, [value])
-
-  const handleChange = async (value: string) => {
-    fetch('/api/socketio').finally(() => {
-      socket.emit('postChange', { payload: value, slug })
-    })
+  const handleChange = (value: string) => {
     setValue(value)
-    // await sendChanges({
-    //   variables: {
-    //     slug,
-    //     payload: value
-    //   }
-    // })
-    // await refetch()
+    setLoading(true)
   }
-
-  if (loading) return <h1>Loading ...</h1>
 
   return (
     <>
@@ -114,7 +93,7 @@ const EditSlug = ({ user, loggedIn, auhtor, post, slug }: Props) => {
           rel="stylesheet"
         />
       </Head>
-      <Box border='1px solid red' display='flex' spacing='30' alignItems='flex-start' position='fixed' left='0' right='0'>
+      <Box display='flex' spacing='30' alignItems='flex-start' position='fixed' left='0' right='0'>
         <MdeEditor value={values} setValue={handleChange} />
         <Box fontSize='large' textAlign='justify' maxW='50%' sx={{
           h1: { color: 'transparent' },
@@ -124,9 +103,12 @@ const EditSlug = ({ user, loggedIn, auhtor, post, slug }: Props) => {
             fontWeight: 'bold'
           }
         }}>
-              <article
+              { loading
+                ? <Spinner size='xl'/>
+                : <article
                 dangerouslySetInnerHTML={{ __html: content }}
-              />
+              /> }
+
             </Box>
       </Box>
     </>
