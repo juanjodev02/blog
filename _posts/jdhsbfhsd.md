@@ -1,2 +1,1 @@
-## Hola mundo
-Esto es 
+Ya funciona más o menos
