@@ -1,5 +1,6 @@
 import { Server } from 'socket.io'
-import { editPost, getPostChange } from '../../lib/api'
+import { editPost } from '../../lib/api'
+import markdownToHtml from '../../lib/markdownToHtml'
 
 const ioHandler = (req, res) => {
   if (!res.socket.server.io) {
@@ -9,10 +10,10 @@ const ioHandler = (req, res) => {
 
     io.on('connection', (socket) => {
       socket.on('postChange', (payload) => {
-        editPost(payload.payload, payload.slug).then(() => {
-          getPostChange(payload.slug).then((postPayload) => {
-            socket.emit('getPostChange', { postPayload })
-          })
+        markdownToHtml(payload.payload).then((postPayload) => {
+          socket.emit('getPostChange', { postPayload })
+        }).finally(() => {
+          editPost(payload.payload, payload.slug)
         })
       })
     })
