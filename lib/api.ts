@@ -5,6 +5,7 @@ import { Author, Post as PrismaPost } from '@prisma/client'
 import { join } from 'path'
 import { getLoginSession } from './auth'
 import { Post } from '../utils/types'
+import { withDashes } from '../utils/string'
 import matter from 'gray-matter'
 
 import markdownToHtml from './markdownToHtml'
@@ -13,11 +14,16 @@ const HASH_ROUNDS = 10
 
 const POSTS_DIRECTORY = join(process.cwd(), '_posts')
 
-export const getViewer = async (req: any) => {
+type PostPayload = {
+  slug: string
+  payload: string
+}
+
+export const getViewer = async (req: any, whitAuthor = false) => {
   let session = null
   if (req) session = await getLoginSession(req)
   if (session) {
-    const user = await prisma.user.findFirst({ where: { id: session.id } })
+    const user = await prisma.user.findFirst({ where: { id: session.id }, include: { author: whitAuthor } })
     return { ...user }
   } else {
     return null
@@ -113,5 +119,49 @@ export const createAuthor = async (
     })
   } else {
     throw Error('Unauthenticated')
+  }
+}
+
+export const createPost = async (title: string, req: any): Promise<String> => {
+  const post = await prisma.post.findFirst({ where: { title } })
+  if (post) {
+    throw new Error('This title already exists')
+  }
+  const user = await getViewer(req, true)
+  if (!user) throw new Error('Missing user data')
+  const slug = withDashes(title)
+  await fs.appendFile(slug, '')
+  await prisma.post.create({
+    data: {
+      title,
+      date: new Date(),
+      slug,
+      author: {
+        connect: {
+          id: user.author.id
+        }
+      }
+    }
+  })
+  await fs.writeFile(`${POSTS_DIRECTORY}/${slug}.md`, '')
+  return slug
+}
+
+export const getPost = async (slug: string) => {
+  return prisma.post.findFirst({ where: { slug } })
+}
+
+export const editPost = async (payload: string, slug: string): Promise<void> => {
+  await fs.writeFile(`${POSTS_DIRECTORY}/${slug}.md`, payload)
+}
+
+export const getPostChange = async (slug: string): Promise<PostPayload> => {
+  const fullPath = join(POSTS_DIRECTORY, `${slug}.md`)
+  const fileContent = await fs.readFile(fullPath, 'utf8')
+  const { content } = matter(fileContent)
+  const htmlContent = await markdownToHtml(content || '')
+  return {
+    payload: htmlContent,
+    slug
   }
 }

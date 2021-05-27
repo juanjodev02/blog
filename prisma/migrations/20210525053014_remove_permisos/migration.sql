@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Post" ALTER COLUMN "coverImage" DROP NOT NULL,
+ALTER COLUMN "excerpt" DROP NOT NULL,
+ALTER COLUMN "ogImage" DROP NOT NULL;

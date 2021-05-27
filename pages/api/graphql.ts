@@ -5,6 +5,15 @@ const apolloServer = new ApolloServer({
   schema,
   context (ctx) {
     return ctx
+  },
+  subscriptions: {
+    path: '/api/graphql/subscriptions',
+    onConnect: (connectionParams, webSocket, context) => {
+      console.log('Client connected')
+    },
+    onDisconnect: (webSocket, context) => {
+      console.log('Client disconnected')
+    }
   }
 })
 

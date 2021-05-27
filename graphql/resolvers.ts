@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import { setLoginSession } from '../lib/auth'
 import { removeTokenCookie } from '../lib/authCookies'
 import prisma from '../lib/db'
-import { getViewer, createUser, createAuthor } from '../lib/api'
+import { getViewer, createUser, createAuthor, createPost as createPostApi, editPost, getPostChange } from '../lib/api'
 
 const validatePassword = async (plainPassword: string, encryptedPassword: string) => {
   return bcrypt.compare(plainPassword, encryptedPassword)
@@ -15,6 +15,17 @@ export const resolvers = {
       try {
         const viewer = await getViewer(context.req)
         return viewer
+      } catch (error) {
+        console.log(error)
+        throw new AuthenticationError(
+          'Authentication token is invalid, please log in'
+        )
+      }
+    },
+    async getPostChange (_parent: any, args: any, context: any, _info: any) {
+      try {
+        const postPayload = await getPostChange(args.slug)
+        return postPayload
       } catch (error) {
         console.log(error)
         throw new AuthenticationError(
@@ -72,6 +83,24 @@ export const resolvers = {
       } catch (error) {
         console.error(error)
         throw new ApolloError('Internal Server Error')
+      }
+    },
+    async createPost (_parent: any, args: any, context: any, _info: any) {
+      try {
+        const slug = await createPostApi(args.title, context.req)
+        return slug
+      } catch (error) {
+        console.error(error)
+        throw new ApolloError(error.message)
+      }
+    },
+    async onPostChange (_parent: any, args: any, context: any, _info: any) {
+      try {
+        const { payload, slug } = args
+        await editPost(payload, slug)
+        return true
+      } catch (error) {
+        throw new AuthenticationError('Something is wrong')
       }
     }
   }

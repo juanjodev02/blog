@@ -51,8 +51,14 @@ export const typeDefs = gql`
     user: User
   }
 
+  type PostPayload {
+    slug: String!
+    payload: String!
+  }
+
   type Query {
     viewer: User
+    getPostChange(slug: String!): PostPayload!
   }
 
   type Mutation {
@@ -60,5 +66,7 @@ export const typeDefs = gql`
     signIn(input: SignInInput!): SignInPayload!
     signOut: Boolean!
     createAuthor(username: String!, name: String!, lastName: String!, twitter: String, github: String): Author
+    createPost(title: String!): String
+    onPostChange(slug: String!, payload: String!): Boolean
   }
 `

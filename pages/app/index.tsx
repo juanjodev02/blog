@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { User, Author } from '@prisma/client'
 import { GetServerSidePropsContext } from 'next'
-import { getViewer, getAuthorByUserId } from '../../lib/api'
+import { getViewer } from '../../lib/api'
 import CompleteProfile from './complete-profile'
 import Signin from '../signin'
 import { useRouter } from 'next/router'
@@ -48,10 +48,9 @@ const App = ({ user, loggedIn, author }: props) => {
 export default App
 
 export async function getServerSideProps ({ req } : GetServerSidePropsContext) {
-  const user = await getViewer(req)
+  const user = await getViewer(req, true)
   if (user) {
-    const author = await getAuthorByUserId(user.id)
-    return { props: { user, loggedIn: true, author } }
+    return { props: { user, loggedIn: true, author: user.author } }
   } else {
     return {
       props: {
