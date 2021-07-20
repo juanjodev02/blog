@@ -1,4 +1,4 @@
-import { Center, Text, Input, Button, VStack, Box} from '@chakra-ui/react'
+import { Center, Text, Input, Button, VStack, Box } from '@chakra-ui/react'
 import { GetServerSidePropsContext } from 'next'
 import { User, Author } from '@prisma/client'
 import Signin from '../../signin'

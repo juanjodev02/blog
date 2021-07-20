@@ -62,7 +62,7 @@ const CompleteProfile = ({ loggedIn, user }: Props) => {
         Completa tu perfil
       </Text>
       <Center>
-        <HStack justifyContent='space-between' width='100%' border='1px solid red'>
+        <HStack justifyContent='space-between' width='100%'>
           <ProfileImageEditable user={user}/>
           <CompleteProfileForm handleSubmit={handleSubmit} loading={loading} errorMsg={error ? error.message : ''}/>
         </HStack>

@@ -1,5 +1,5 @@
 import { User, Author, Post } from '@prisma/client'
-import { gql, useMutation, useQuery } from '@apollo/client'
+// import { gql, useMutation, useQuery } from '@apollo/client'
 import io from 'socket.io-client'
 import { Box, Spinner } from '@chakra-ui/react'
 import Signin from '../../signin'
@@ -17,20 +17,20 @@ type Props = {
   slug: string
 }
 
-const SEND_CHANGES = gql`
-  mutation onPostChange($slug: String!, $payload: String! ) {
-    onPostChange(slug:  $slug, payload: $payload)
-  }
-`
+// const SEND_CHANGES = gql`
+//   mutation onPostChange($slug: String!, $payload: String! ) {
+//     onPostChange(slug:  $slug, payload: $payload)
+//   }
+// `
 
-const GET_POST_CHANGES = gql`
-  query getPostChange($slug: String!) {
-    getPostChange(slug: $slug) {
-      payload
-      slug
-    }
-  }
-`
+// const GET_POST_CHANGES = gql`
+//   query getPostChange($slug: String!) {
+//     getPostChange(slug: $slug) {
+//       payload
+//       slug
+//     }
+//   }
+// `
 
 const socket = io()
 
@@ -93,7 +93,7 @@ const EditSlug = ({ user, loggedIn, auhtor, post, slug }: Props) => {
           rel="stylesheet"
         />
       </Head>
-      <Box display='flex' spacing='30' alignItems='flex-start' position='fixed' left='0' right='0'>
+      <Box display='flex' spacing='30' alignItems='flex-start' left='0' right='0'>
         <MdeEditor value={values} setValue={handleChange} />
         <Box fontSize='large' textAlign='justify' maxW='50%' sx={{
           h1: { color: 'transparent' },
