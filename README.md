@@ -12,7 +12,7 @@ Para ejecutar el proyecto de forma local se necesita seguir los siguientes pasos
     > Dentro del archivo `.env.example` tienes un ejemplo de cuales son las variables de entorno.
 4. En un terminal, ejecuta el comando para sincronizar la base de datos
     ```
-    yarn prisma migrate reset
+    yarn prisma migrate dev
     ```
     Con esto se creará una base de datos y el esquema necesario para el proyecto
 
